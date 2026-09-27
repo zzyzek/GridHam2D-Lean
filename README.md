@@ -114,6 +114,14 @@ Build completed successfully (8963 jobs).
 The Python files used to design and test the proof (`grid_hampath.py`,
 `bruteforce.py`, `verify.py`) are not needed for the build.
 
+## AI Disclosure
+
+This work was carried out in collaboration with Claude (Claude Opus 5.5, Anthropic), a large
+language model, used through a chat interface with code execution. The author posed the problem,
+provided an open source implementation of the algorithm and provided a copy of the paper. Claude
+wrote the Lean4 proof in it's entirety, wrote the programs located in `src` and wrote the majority
+of the supporting documentation.
+
 ## License
 
 Unless explicitly stated otherwise, everything in this directory is put under a CC0 license:
