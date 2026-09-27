@@ -6,6 +6,8 @@ in rectangular grid graphs from
 > A. Itai, C. H. Papadimitriou, J. L. Szwarcfiter,
 > *Hamilton Paths in Grid Graphs*, SIAM J. Comput. 11(4), 1982, 676–686.
 
+[DOI 10.1137/0211056](https://doi.org/10.1137/0211056)
+
 ## The theorem
 
 `GridHam/Main.lean`:
@@ -67,6 +69,7 @@ has no path).
 | `F3.lean` | Tools for reasoning about path neighbours in list-based paths; the case-3 obstruction on 3-high grids. |
 | `Necessity.lean` | Necessity: forbidden cases 2 and 3 are really forbidden; assembly of Theorem 3.1. |
 | `CrossCheck.lean` | A test, not part of the proof and not in the default build: `IsAcceptable` agrees with brute force up to area 20. Run with `lake build GridHam.CrossCheck`. |
+| `SpotCheck.lean` | Some spot checks that include concrete instances you can edit and re-run. Not part of the main proof. |
 
 ## How the proof differs from the paper
 
@@ -95,10 +98,30 @@ has no path).
 lake exe cache get   # prebuilt Mathlib
 lake build           # a few minutes; PrimeTable and Reduction are the slow files
 lake build GridHam.CrossCheck   # optional: the brute-force cross-check test
+lake build GridHam.SpotCheck    # optional: run spot checks
 ```
 
 A clean build prints only the two `#print axioms` lines from `Main.lean`
-(no warnings).
+(no warnings):
+
+```
+ℹ [8961/8963] Replayed GridHam.Main
+info: GridHam/Main.lean:173:0: 'GridHam.ips_sufficiency' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: GridHam/Main.lean:174:0: 'GridHam.ips_characterization' depends on axioms: [propext, Classical.choice, Quot.sound]
+Build completed successfully (8963 jobs).
+```
 
 The Python files used to design and test the proof (`grid_hampath.py`,
 `bruteforce.py`, `verify.py`) are not needed for the build.
+
+## License
+
+Unless explicitly stated otherwise, everything in this directory is put under a CC0 license:
+
+> To the extent possible under law, the person who associated CC0 with
+> this project has waived all copyright and related or neighboring rights
+> to this project.
+> 
+> You should have received a copy of the CC0 legalcode along with this
+> work.  If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
+
