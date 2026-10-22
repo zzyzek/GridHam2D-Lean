@@ -1,6 +1,14 @@
-import GridHam.Arith
-import GridHam.StripSplit
-import GridHam.F3
+/-
+SPDX-License-Identifier: CC0-1.0
+Dedicated to the public domain under CC0 1.0 Universal; see LICENSE.
+-/
+module
+
+public import GridHam.Arith
+public import GridHam.StripSplit
+public import GridHam.F3
+
+@[expose] public section
 
 /-!
 # Necessity (IPS Theorem 3.1): a Hamiltonian path forces acceptability

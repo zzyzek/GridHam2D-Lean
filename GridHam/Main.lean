@@ -1,8 +1,16 @@
-import GridHam.PrimeTable
-import GridHam.Arith
-import GridHam.StripSplit
-import GridHam.Reduction
-import GridHam.Necessity
+/-
+SPDX-License-Identifier: CC0-1.0
+Dedicated to the public domain under CC0 1.0 Universal; see LICENSE.
+-/
+module
+
+public import GridHam.PrimeTable
+public import GridHam.Arith
+public import GridHam.StripSplit
+public import GridHam.Reduction
+public import GridHam.Necessity
+
+@[expose] public section
 
 /-!
 # Main theorem: IPS's characterization of Hamiltonian paths in rectangular

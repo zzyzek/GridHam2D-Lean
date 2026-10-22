@@ -1,0 +1,131 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/main/schema/formalization.schema.json
+version: "v0.4"
+
+project:
+  name: "Hamiltonian paths in rectangular grid graphs (Itai, Papadimitriou and Szwarcfiter)"
+  description: >-
+    A Lean 4 proof of the characterization of Hamiltonian paths in rectangular grid graphs by
+    Itai, Papadimitriou and Szwarcfiter (1982, Theorem 3.2). For distinct vertices s and t of the
+    width × height grid graph, a Hamiltonian path from s to t exists if and only if the problem
+    is acceptable, that is, colour compatible (by the checkerboard colouring) and not one of the
+    three forbidden configurations F1, F2, F3 on grids of width or height 1, 2 or 3. Necessity
+    is proved for each forbidden case, where the paper only says "a straightforward case
+    analysis". Sufficiency is proved by strong induction with an explicit reduction rule
+    (strip two columns or split at a cut edge) and 596 kernel-checked base-case paths.
+  authors:
+    - "Z. Zzyzek (github: zzyzek)"
+  license: "CC0-1.0"
+  responsible_maintainers:
+    - "Z. Zzyzek (github: zzyzek)"
+
+classification:
+  arxiv: ["cs.DM", "math.CO"]
+  msc2020: ["05C45", "05C38"]
+
+sources:
+  - title: "Hamilton paths in grid graphs"
+    type: article
+    relationship: adapts
+    authors:
+      - "A. Itai"
+      - "C. H. Papadimitriou"
+      - "J. L. Szwarcfiter"
+    id: "doi:10.1137/0211056"
+    location: "SIAM Journal on Computing 11 (1982), 676–686"
+    author_endorsement: not-contacted
+    note: >-
+      Theorem 3.2 is the registered statement. Sufficiency follows the paper's stripping and
+      splitting, with an explicit rule for which strip or split to apply in place of the paper's
+      prime-problem case analysis (Lemmas 3.2.4 to 3.2.6). Necessity of F2 and F3 (Lemma 3.1,
+      no proof in the paper) is proved here from scratch. The paper's NP-completeness results
+      (Section 2) are not formalized.
+  - title: "grid-solver"
+    type: software
+    relationship: background
+    location: "https://github.com/whatsacomputertho/grid-solver"
+    note: >-
+      An open-source Rust implementation of the paper's algorithm. The arithmetic form of the
+      forbidden cases in the statement was transcribed from it.
+
+related_formalizations: []
+
+status:
+  scope: >-
+    Formalized and registered: for all width, height and distinct in-bounds vertices s, t,
+    HasHamPath width height s t ↔ IsAcceptable width height s t. Rectangular grid graphs only.
+    Not formalized: the paper's NP-completeness of Hamiltonian cycles and paths in general grid
+    graphs (Section 2), and the running time of the path-finding algorithm.
+  sorry_count: 0
+  sorry_in_definitions: 0
+  axioms: []
+  main_results:
+    - declaration: "GridHam.ips_characterization"
+      file: "GridHam/Main.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      comparator_config: "comparator.json"
+    - declaration: "GridHam.ips_sufficiency"
+      file: "GridHam/Main.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+
+automation:
+  methods:
+    - method: agent
+      models: ["Claude Opus 5.5"]
+      framework: "Claude (chat interface with code execution)"
+      tool_setup: >-
+        Claude in a chat interface with code execution, the Lean toolchain and Python. The
+        human provided the problem, a copy of the paper and an open-source implementation of
+        the algorithm.
+      cost:
+        wall_time: "not tracked"
+        spend_usd: "subscription-based"
+        hardware: "local machine (4 cores, 32 GB)"
+      prompting_notes: >-
+        The human posed the problem, set the goal of a complete Lean proof, and steered by review
+        and requests in conversation.
+  spend_usd: "subscription-based"
+  notes: >-
+    Claude (Opus 5.5) wrote the Lean 4 proof in its entirety, the Python programs used to design
+    and test the reduction rule, and most of the documentation. The listed author contributed
+    the problem statement, the paper, the reference implementation and guidance.
+
+fidelity:
+  divergences: >-
+    Coordinates are 0-indexed and the grid is the induced grid graph on [0, width) × [0, height).
+    A Hamiltonian path is a list of vertices (ValidPath): the right length, starting at s and
+    ending at t, no repeats, all in bounds, covering every vertex, consecutive vertices
+    adjacent. The forbidden cases are stated arithmetically. F1 and F2 are as in the paper. The
+    paper states F3 up to isomorphism of the grid, and ForbiddenCase3 writes the reflections out
+    (either dimension may be the one equal to 3, and t may lie on either side of s). Because the
+    registered statement is an equivalence with HasHamPath, any transcription error in the
+    forbidden cases would make the statement false and could not be proved. The definitions were
+    also compared with the paper's F3 on 3 × m grids up to m = 40 (103,284 instances) and with
+    brute-force search up to area 26. The theorem assumes s ≠ t, which the paper leaves
+    implicit; without it the statement is false (3 × 3, s = t = (0, 0)).
+
+review:
+  status: "self-assessed"
+  reviewers:
+    - "none"
+  notes: >-
+    The kernel checks the proofs, which use only propext, Classical.choice and Quot.sound.
+    Computational checks run in the kernel through decide (no native_decide). The statement and
+    its definitions were audited by the author and the agent against the paper. Independent
+    mathematical review has not taken place.
+
+alignment:
+  namespace: "GridHam"
+  statements:
+    - source: "Theorem 3.2 (with Theorem 3.1, necessity)"
+      lean: "GridHam.ips_characterization"
+      module: "GridHam.Main"
+      status: "proved"
+    - source: "Sufficiency (Section 3.2)"
+      lean: "GridHam.ips_sufficiency"
+      module: "GridHam.Main"
+      status: "proved"
+      note: "Not registered. The direction IsAcceptable → HasHamPath."
+
+acknowledgements: "Lean 4 and Mathlib."

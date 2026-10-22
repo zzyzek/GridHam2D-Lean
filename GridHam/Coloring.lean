@@ -1,4 +1,12 @@
-import GridHam.Basic
+/-
+SPDX-License-Identifier: CC0-1.0
+Dedicated to the public domain under CC0 1.0 Universal; see LICENSE.
+-/
+module
+
+public import GridHam.Defs
+
+@[expose] public section
 
 /-!
 # Color compatibility (necessary condition, part 1)
@@ -18,9 +26,6 @@ only `(n-1)/2` of them (`cnt1_grid`) and the path has no repeats.
 -/
 
 namespace GridHam
-
-/-- The checkerboard color of a vertex: `0` or `1`. -/
-def parity (v : Coord) : ℕ := (v.1 + v.2) % 2
 
 /-- Adjacent vertices always have different parity: exactly one coordinate
 changes by exactly 1, so the coordinate sum's parity flips. -/
@@ -164,17 +169,6 @@ theorem hamPath_implies_diff_parity_of_even
       have hcl : (a :: rest).length = rest.length + 1 := rfl
       omega
     omega
-
-/-- The color-compatibility condition from `grid_hampath.py`'s
-`are_color_compatible`, ported directly. -/
-def ColorCompatible (width height : ℕ) (s t : Coord) : Prop :=
-  if (width * height) % 2 = 1 then
-    parity s = 0 ∧ parity t = 0
-  else
-    parity s ≠ parity t
-
-instance : DecidablePred (fun p : Coord × Coord => ColorCompatible width height p.1 p.2) :=
-  fun p => by unfold ColorCompatible; infer_instance
 
 /-! ### The odd case: counting colour-1 cells -/
 

@@ -1,5 +1,13 @@
-import GridHam.Arith
-import GridHam.PrimeTable
+/-
+SPDX-License-Identifier: CC0-1.0
+Dedicated to the public domain under CC0 1.0 Universal; see LICENSE.
+-/
+module
+
+public import GridHam.Arith
+public import GridHam.PrimeTable
+
+@[expose] public section
 
 /-!
 # Reduction lemmas (arithmetic)

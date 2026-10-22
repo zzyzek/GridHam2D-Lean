@@ -1,3 +1,7 @@
+/-
+SPDX-License-Identifier: CC0-1.0
+Dedicated to the public domain under CC0 1.0 Universal; see LICENSE.
+-/
 import Lake
 open Lake DSL
 
@@ -8,3 +12,9 @@ require mathlib from git
 
 @[default_target]
 lean_lib «GridHam» where
+
+-- The Palomar registry statement (`Challenge`, imports only Mathlib) and its solution.
+--
+lean_lib «Challenge» where
+
+lean_lib «Solution» where

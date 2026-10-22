@@ -1,121 +1,22 @@
-import GridHam.Coloring
+/-
+SPDX-License-Identifier: CC0-1.0
+Dedicated to the public domain under CC0 1.0 Universal; see LICENSE.
+-/
+module
+
+public import GridHam.Coloring
+
+@[expose] public section
 
 /-!
 # Forbidden cases (necessary condition, part 2)
 
-Color compatibility alone is not sufficient: `grid_hampath.py`'s
-`is_forbidden` (cases for `width/height ∈ {1,2,3}`) rules out additional
-color-compatible pairs. This file ports those three cases directly, then
-states (but does not yet prove) the necessity theorem for each.
-
-STATUS: definitions only, transcribed carefully from the Python (which was
-itself exhaustively cross-checked against brute-force search for all
-`width,height` with `width*height ≤ 26`, including every case-3 instance --
-see `verify.py`'s `exhaustive_characterization_check`, 0 mismatches). So
-there is strong *empirical* evidence these definitions are correct, even
-though the Lean necessity proofs below are `sorry`. Proving `isForbidden →
-¬HasHamPath` for each case is a real (if bounded) undertaking: case 1 is a
-short argument (a path on a width/height-1 grid literally has no choice but
-to be the straight line), case 2 is a cut/separation argument, case 3 is the
-most involved (a parity-and-distance argument about which side of a
-mandatory 3-wide crossing each color lands on). None attempted here.
+The forbidden cases `ForbiddenCase1/2/3` and `IsAcceptable` are defined in `Defs.lean`. This file
+proves that forbidden case 1 (`width = 1` or `height = 1`) admits no Hamiltonian path. Cases 2
+and 3 are in `Necessity.lean`.
 -/
 
 namespace GridHam
-
-/-- `v` is one of the four corners of the `width × height` grid. -/
-def IsCorner (width height : ℕ) (v : Coord) : Prop :=
-  v = (0, 0) ∨ v = (width - 1, 0) ∨ v = (0, height - 1) ∨ v = (width - 1, height - 1)
-
-instance : DecidablePred (fun v => IsCorner width height v) :=
-  fun v => by unfold IsCorner; infer_instance
-
-/-- Ported from `_is_forbidden_case_1`: when `width = 1` or `height = 1`, a
-Hamiltonian path must be the straight line, so `{s,t}` must be exactly the
-two extreme corners.
-
-REVISION NOTE: originally stated using `Set Coord` equality (`{s,t} =
-{(0,0), far}`), which is mathematically fine but unnecessarily hard to work
-with in an actual proof (`Set` equality needs `Set.ext`-style unfolding, and
-isn't `Decidable` in general). Rewritten as a plain `∨`/`∧`/`=` statement on
-`Coord` directly, matching every other definition in this file -- this is
-what a two-element set equality actually *means* for a two-element set, just
-spelled out instead of routed through `Set`. -/
-def ForbiddenCase1 (width height : ℕ) (s t : Coord) : Prop :=
-  let isW := width = 1
-  let bound := if isW then height else width
-  let far : Coord := if isW then (0, bound - 1) else (bound - 1, 0)
-  ¬ ((s = (0, 0) ∧ t = far) ∨ (s = far ∧ t = (0, 0)))
-
-instance : DecidablePred (fun p : Coord × Coord => ForbiddenCase1 width height p.1 p.2) :=
-  fun p => by unfold ForbiddenCase1; infer_instance
-
-/-- Ported from `_is_forbidden_case_2`: when `width = 2` or `height = 2`, a
-non-boundary edge between two non-corner vertices can't be the path's
-mandatory final crossing. -/
-def ForbiddenCase2 (width height : ℕ) (s t : Coord) : Prop :=
-  ¬ IsCorner width height s ∧ ¬ IsCorner width height t ∧
-  ((width = 2 ∧ s.2 = t.2) ∨ (height = 2 ∧ s.1 = t.1))
-
-/-- Ported from `_is_forbidden_case_3`: when `width = 3` or `height = 3` and
-the opposite dimension is even, a distance-and-parity condition on `s`, `t`
-relative to the grid's corners rules out a Hamiltonian path even though
-`s`,`t` are color-compatible. Transcribed directly from the Rust/Python
-index arithmetic; not independently re-derived from the paper here. -/
-def ForbiddenCase3 (width height : ℕ) (s t : Coord) : Prop :=
-  let isW := width = 3
-  let oppDim := if isW then height else width
-  oppDim % 2 = 0 ∧
-  parity s ≠ parity t ∧
-  ( let c0 := if isW then s.2 else s.1
-    let c1 := if isW then t.2 else t.1
-    let oppCoord := if isW then s.1 else s.2
-    let isGreater := c1 < c0
-    let distance := if isGreater then c0 - c1 else c1 - c0
-    let distSat := if oppCoord = 1 then distance > 0 else distance > 1
-    distSat ∧
-    ((isGreater ∧ parity s ≠ 1) ∨ ((¬ isGreater) ∧ parity s ≠ 0)) )
-
-/-- Ported from `is_forbidden`: dispatches to the case matching whichever of
-`width`/`height` is `1`, `2`, or `3` (checked in that priority order, as in
-the source). -/
-def IsForbidden (width height : ℕ) (s t : Coord) : Prop :=
-  if width = 1 ∨ height = 1 then ForbiddenCase1 width height s t
-  else if width = 2 ∨ height = 2 then ForbiddenCase2 width height s t
-  else if width = 3 ∨ height = 3 then ForbiddenCase3 width height s t
-  else False
-
-/-- Ported from `is_acceptable`. This is IPS's full necessary-and-sufficient
-condition; `Main.lean`'s top-level theorem is `HasHamPath ↔ IsAcceptable`. -/
-def IsAcceptable (width height : ℕ) (s t : Coord) : Prop :=
-  ColorCompatible width height s t ∧ ¬ IsForbidden width height s t
-
-/-! Direct (non-`DecidablePred`) instances, so `decide`/`#eval` can evaluate
-`IsAcceptable w h s t` for concrete arguments (used by `CrossCheck.lean`). -/
-
-instance instDecColorCompatible (w h : ℕ) (s t : Coord) :
-    Decidable (ColorCompatible w h s t) := by
-  unfold ColorCompatible; infer_instance
-
-instance instDecForbiddenCase1 (w h : ℕ) (s t : Coord) :
-    Decidable (ForbiddenCase1 w h s t) := by
-  unfold ForbiddenCase1; infer_instance
-
-instance instDecForbiddenCase2 (w h : ℕ) (s t : Coord) :
-    Decidable (ForbiddenCase2 w h s t) := by
-  unfold ForbiddenCase2 IsCorner; infer_instance
-
-instance instDecForbiddenCase3 (w h : ℕ) (s t : Coord) :
-    Decidable (ForbiddenCase3 w h s t) := by
-  unfold ForbiddenCase3; infer_instance
-
-instance instDecIsForbidden (w h : ℕ) (s t : Coord) :
-    Decidable (IsForbidden w h s t) := by
-  unfold IsForbidden; infer_instance
-
-instance instDecIsAcceptable (w h : ℕ) (s t : Coord) :
-    Decidable (IsAcceptable w h s t) := by
-  unfold IsAcceptable; infer_instance
 
 /-- The core combinatorial fact underlying `forbiddenCase1_implies_no_path`,
 isolated as its own self-contained statement about plain `List ℕ` (no
@@ -125,16 +26,7 @@ interval to the other, in one direction or the other. This is what forces a
 Hamiltonian path on a width-1 (or height-1) grid to be monotonic -- a width-1
 grid's vertices, read off by their single free coordinate, are *exactly*
 such a sequence.
-
-STATUS: stated, not proved. This is real, nontrivial combinatorial content
-(prove by strong induction on length; the crux is that a "unit chain"
-covering `[k, k+n)` starting at an *interior* point of that range would,
-followed in either direction, run out of room on one side while the other
-side stays uncovered and unreachable) -- not the routine index/`Bool`
-bookkeeping that closed out `Coloring.lean`'s lemmas. Deliberately left as
-its own precisely-scoped lemma rather than attempted inline and possibly
-wrong: isolating exactly what's still needed is worth more than a guessed
-proof that doesn't compile. -/
+The statement is `unitChain_endpoints`, proved below. -/
 def unitStepB (a b : ℕ) : Bool := decide (a + 1 = b ∨ b + 1 = a)
 
 def unitStepChain : List ℕ → Bool

@@ -39,12 +39,13 @@ via `decide +kernel`).
 A compiled proof only certifies the statement as written. To trust that it is
 *IPS's* theorem, check these definitions by reading them (they are short):
 
-* `Basic.lean`: `Coord` (`ℕ × ℕ`, 0-indexed), `InBounds`, `Adjacent`,
-  `allCoords`, `ValidPath` (right length, starts at `s`, ends at `t`, no
-  repeats, all in bounds, covers every cell, consecutive cells adjacent), and
-  `HasHamPath`.
-* `Coloring.lean`: `parity`, `ColorCompatible`.
-* `Forbidden.lean`: `ForbiddenCase1/2/3`, `IsForbidden`, `IsAcceptable`.
+* `Coord` (`ℕ × ℕ`, 0-indexed), `InBounds`, `Adjacent`, `allCoords`,
+  `ValidPath` (right length, starts at `s`, ends at `t`, no repeats, all in
+  bounds, covers every cell, consecutive cells adjacent), and `HasHamPath`.
+* `parity`, `ColorCompatible`.
+* `ForbiddenCase1/2/3`, `IsForbidden`, `IsAcceptable`.
+
+All of them are in `GridHam/Defs.lean`.
 
 The forbidden cases were transcribed from an open-source Rust implementation
 and then checked three ways: against exhaustive brute-force search in Python
@@ -58,9 +59,9 @@ has no path).
 
 | File | Contents |
 |---|---|
-| `Basic.lean` | Definitions: grid, adjacency, Hamiltonian path. |
+| `Defs.lean` | Every definition the statement uses: grid, adjacency, Hamiltonian path, colour compatibility, forbidden cases. |
 | `Coloring.lean` | Colours alternate along a path; colour compatibility is necessary (even grids by alternation, odd grids by counting colour-1 cells). |
-| `Forbidden.lean` | Definitions of the forbidden cases; forbidden case 1 (1-wide grids) is really forbidden. |
+| `Forbidden.lean` | Forbidden case 1 (1-wide grids) is really forbidden. |
 | `Arith.lean` | `AccA`: acceptability as a pure arithmetic formula, with `acc_iff` proving the two agree. |
 | `StripSplit.lean` | Path constructions: reversal, transpose, reflection; splitting along a cut edge; stripping two columns (degree argument for a boundary edge, then a detour). |
 | `PrimeTable.lean` | Base cases: 596 explicit paths for the prime shapes (≤ 3×3, 4×4, 4×5, 5×4), verified by the kernel. |
@@ -70,6 +71,18 @@ has no path).
 | `Necessity.lean` | Necessity: forbidden cases 2 and 3 are really forbidden; assembly of Theorem 3.1. |
 | `CrossCheck.lean` | A test, not part of the proof and not in the default build: `IsAcceptable` agrees with brute force up to area 20. Run with `lake build GridHam.CrossCheck`. |
 | `SpotCheck.lean` | Some spot checks that include concrete instances you can edit and re-run. Not part of the main proof. |
+
+## Palomar registry
+
+`Challenge.lean` states `GridHam.ips_characterization` with `sorry`, after a
+verbatim copy of `GridHam/Defs.lean`. It imports only Mathlib.
+`Solution.lean` imports the library, which proves the theorem.
+`comparator.json` configures
+[`lake comparator`](https://github.com/leanprover/comparator) to check that
+the two agree and that the proof uses only `propext`, `Classical.choice` and
+`Quot.sound`. `formalization.yaml` holds the registry metadata. Every Lean
+file uses the module system (`module`, `public import`), as the registry
+requires.
 
 ## How the proof differs from the paper
 
@@ -105,10 +118,9 @@ A clean build prints only the two `#print axioms` lines from `Main.lean`
 (no warnings):
 
 ```
-ℹ [8961/8963] Replayed GridHam.Main
-info: GridHam/Main.lean:173:0: 'GridHam.ips_sufficiency' depends on axioms: [propext, Classical.choice, Quot.sound]
-info: GridHam/Main.lean:174:0: 'GridHam.ips_characterization' depends on axioms: [propext, Classical.choice, Quot.sound]
-Build completed successfully (8963 jobs).
+info: GridHam/Main.lean:181:0: 'GridHam.ips_sufficiency' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: GridHam/Main.lean:182:0: 'GridHam.ips_characterization' depends on axioms: [propext, Classical.choice, Quot.sound]
+Build completed successfully.
 ```
 
 The Python files used to design and test the proof (`grid_hampath.py`,

@@ -1,39 +1,24 @@
-import GridHam.Forbidden
+/-
+SPDX-License-Identifier: CC0-1.0
+Dedicated to the public domain under CC0 1.0 Universal; see LICENSE.
+-/
+module
+
+public import GridHam.Forbidden
+
+@[expose] public section
 
 /-!
 # Strip and split: the sufficiency-direction reduction lemmas
 
-This is the Lean counterpart of `_try_strip_{right,up,left,down}` and
-`_split_{horizontally,vertically}` in `grid_hampath.py`. Together with the
-prime base cases (`PrimeCases.lean`), these are exactly the pieces
-`Main.lean`'s strong induction combines to prove sufficiency
-(`IsAcceptable → HasHamPath`).
+The path constructions that `Main.lean`'s strong induction combines to prove sufficiency
+(`IsAcceptable → HasHamPath`), together with the prime base cases (`PrimeTable.lean`): reversal,
+transpose and reflection of paths; splitting along a cut edge; and stripping two columns (a
+degree argument gives a boundary edge facing the strip, then a detour through the strip).
 
-Each lemma states that solvability of a strictly smaller sub-problem
-implies solvability of the original -- i.e. these are the *constructive*
-direction, matching `_extend_{up,down,left,right}` in the Python (which
-build the actual detour path). A full proof of each lemma here would need
-to exhibit that detour explicitly and show it's a valid extension, mirroring
-`_extend_*`; that construction is not repeated here, only the statements.
-
-STATUS: statements only (`sorry`), mirroring conditions cross-checked
-empirically against brute-force search in `verify.py` (1,019,200+ structural
-instances, 0 failures) and, separately, against exhaustive existence search
-for `width*height ≤ 26` (0 mismatches). Also see `FINDINGS.md` for the one
-substantive fix made during the port: reconstruction must undo strips in
-*reverse* order, which matters for `Main.lean`'s assembly but not for these
-individual lemma statements.
-
-REVISION NOTE: the split lemmas below were rewritten from a previous
-version that had a real signature bug (flagged and now fixed): they had
-fixed the cut vertex's row/column to `s`'s or `t`'s own coordinate, when
-`_split_vertically`/`_split_horizontally` in `grid_hampath.py` actually
-*search over* a free cut-row (for a vertical split) or cut-column (for a
-horizontal split), independent of either endpoint's coordinate. Each split
-direction also has two orientation cases (`s` left/below of `t`, or the
-reverse), matching the Python's `is_start_left`/`is_start_below` branches --
-stated here as separate lemmas rather than one lemma with a disjunctive
-hypothesis, to keep each one's geometry unambiguous.
+Each lemma says that a path for a strictly smaller problem gives a path for the original. The
+split lemmas search over a free cut row (or column), and each split direction has two
+orientation cases, `s` left of (below) `t` or the reverse, stated as separate lemmas.
 -/
 
 namespace GridHam
